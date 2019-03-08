@@ -31,3 +31,22 @@ parallel -j4 --bar --link ./BasicTractography2.sh {1} {2} {3} {4} ::: $root/data
 
 root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
 parallel -j4 --bar 'cat {} | dteig -inputdatatype float -outputdatatype float -inputmodel dt > {.}_eig.Bfloat' ::: $root/data_dti.Bfloat
+
+## Debugging...
+cd Tractography/DTI_toNagesh_3_1_19/4160_hsi_120002_TOI2/UPR/DiffusionPreproc/data
+fsl2scheme -bvalfile bvals -bvecfile bvecs_swapxy > camino.scheme
+modelfit -inputfile data.Bfloat -inputdatatype float -outputdatatype float -outputfile data_dti2.Bfloat -schemefile camino.scheme -model ldt
+cat data_dti2.Bfloat | dteig -inputdatatype float -outputdatatype float -inputmodel dt > data_dti2_eig.Bfloat
+
+
+fsl2scheme -bvalfile bvals -bvecfile bvecs_swapyz > camino.scheme
+modelfit -inputfile data.Bfloat -inputdatatype float -outputdatatype float -outputfile data_dti3.Bfloat -schemefile camino.scheme -model ldt
+cat data_dti3.Bfloat | dteig -inputdatatype float -outputdatatype float -inputmodel dt > data_dti3_eig.Bfloat
+pdview -inputfile data_dti3_eig.Bfloat -inputmodel dteig -header data.nii.gz -inputdatatype float
+
+fsl2scheme -bvalfile bvals -bvecfile bvecs_swapxz > camino.scheme
+modelfit -inputfile data.Bfloat -inputdatatype float -outputdatatype float -outputfile data_dti4.Bfloat -schemefile camino.scheme -model ldt
+cat data_dti4.Bfloat | dteig -inputdatatype float -outputdatatype float -inputmodel dt > data_dti4_eig.Bfloat
+pdview -inputfile data_dti4_eig.Bfloat -inputmodel dteig -header data.nii.gz -inputdatatype float
+
+x z seems to be it!!!
