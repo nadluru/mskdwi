@@ -18,7 +18,7 @@ root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
 parallel --link echo {1} {2} {3} ::: $root/data.nii.gz ::: $root/bvals ::: $root/bvecs
 
 root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
-parallel -j4 --bar --plus 'bet {} {..}_bet -m;fslmaths {..}_bet_mask.nii.gz -ero {..}_bet_mask_ero.nii.gz;' ::: $root/data.nii.gz
+parallel -j4 --verbose -k --bar --plus 'bet {} {..}_bet -m;fslmaths {..}_bet_mask.nii.gz -ero {..}_bet_mask_ero.nii.gz;' ::: $root/data.nii.gz
 
 root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
 parallel -j4 --bar --link ./BasicTractography2.sh {1} {2} {3} {4} ::: $root/data.nii.gz ::: $root/bvals ::: $root/bvecs ::: $root/nodif_brain_mask.nii.gz
@@ -30,7 +30,31 @@ root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
 parallel -j4 --bar --link ./BasicTractography2.sh {1} {2} {3} {4} ::: $root/data.nii.gz ::: $root/bvals ::: $root/bvecs ::: $root/data_bet_mask_ero.nii.gz
 
 root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
+parallel -j4 --bar --link ./BasicTractography2.sh {1} {2} {3} {4} ::: $root/data.nii.gz ::: $root/bvals ::: $root/bvecs_swapxz ::: $root/data_bet_mask_ero.nii.gz
+
+root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
 parallel -j4 --bar 'cat {} | dteig -inputdatatype float -outputdatatype float -inputmodel dt > {.}_eig.Bfloat' ::: $root/data_dti.Bfloat
+
+
+root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
+parallel -j8 --bar --plus 'image2voxel -4dimage {} -inputdatatype float -outputdatatype float -outputfile {..}.Bfloat' ::: $root/data.nii.gz
+
+root="DTI_toNagesh_3_1_19/*/COMBI"
+parallel -j8 --bar --plus 'image2voxel -4dimage {} -inputdatatype float -outputdatatype float -outputfile {..}.Bfloat' ::: $root/data_combi.nii.gz
+
+root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
+parallel -j4 --verbose -k --bar --link ./BasicTractography2.sh {1} {2} {3} {4} {5} ::: $root/data.nii.gz ::: $root/bvals ::: $root/bvecs_swapxz ::: $root/data_bet_mask_ero.nii.gz ::: xz
+
+root="DTI_toNagesh_3_1_19/*/COMBI"
+parallel -j4 --verbose -k --bar --plus 'bet {} {..}_bet -m;fslmaths {..}_bet_mask.nii.gz -ero {..}_bet_mask_ero.nii.gz;' ::: $root/data_combi.nii.gz
+
+root="DTI_toNagesh_3_1_19/*/COMBI"
+root2="DTI_toNagesh_3_1_19/*/UPR/DiffusionPreproc/data"
+parallel -j4 --verbose -k --bar --link ./BasicTractography2.sh {1} {2} {3} {4} {5} ::: $root/data_combi.nii.gz ::: $root2/bvals ::: $root2/bvecs_swapxz ::: $root/data_combi_bet_mask_ero.nii.gz ::: xz
+
+root="DTI_toNagesh_3_1_19/*/COMBI"
+root2="DTI_toNagesh_3_1_19/*/UPR/DiffusionPreproc/data"
+parallel -j4 --verbose -k --bar --link ./BasicTractography2.sh {1} {2} {3} {4} {5} ::: $root/data_combi.nii.gz ::: $root2/bvals ::: $root2/bvecs ::: $root/data_combi_bet_mask_ero.nii.gz ::: noswap
 
 ## Debugging...
 cd Tractography/DTI_toNagesh_3_1_19/4160_hsi_120002_TOI2/UPR/DiffusionPreproc/data
@@ -50,3 +74,21 @@ cat data_dti4.Bfloat | dteig -inputdatatype float -outputdatatype float -inputmo
 pdview -inputfile data_dti4_eig.Bfloat -inputmodel dteig -header data.nii.gz -inputdatatype float
 
 x z seems to be it!!!
+
+
+# hmm....does not seem to be...so trying yz again. 3898 had issues prior to ISMRM as well so focussing on that first.
+
+fsl2scheme -bvalfile bvals -bvecfile bvecs_yz > camino.scheme
+modelfit -inputfile data_combi.Bfloat -inputdatatype float -outputdatatype float -outputfile data_dti3.Bfloat -schemefile camino.scheme -bgmask data_combi_bet_mask.nii.gz -model ldt
+cat data_dti3.Bfloat | dteig -inputdatatype float -outputdatatype float -inputmodel dt > data_dti3_eig.Bfloat
+pdview -inputfile data_dti3_eig.Bfloat -inputmodel dteig -header data.nii.gz -inputdatatype float
+
+# 4/1/2019. 10:38 a.m.
+
+root="DTI_toNagesh_3_1_19/*/??R/DiffusionPreproc/data"
+parallel -j4 --verbose -k --bar --link ./BasicTractography2.sh {1} {2} {3} {4} {5} ::: $root/data.nii.gz ::: mskscannerbvals ::: mskscannerbvecs ::: $root/data_bet_mask_ero.nii.gz ::: scanner
+
+
+root="DTI_toNagesh_3_1_19/*/COMBI"
+root2="DTI_toNagesh_3_1_19/*/UPR/DiffusionPreproc/data"
+parallel -j4 --verbose -k --bar --link ./BasicTractography2.sh {1} {2} {3} {4} {5} ::: $root/data_combi.nii.gz ::: mskscannerbvals ::: mskscannerbvecs ::: $root/data_combi_bet_mask_ero.nii.gz ::: scanner
