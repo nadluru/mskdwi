@@ -1,4 +1,4 @@
-# mskdwi
+# Diffusion weighted imaging of musculoskeletal (MSK) tissue
 Initial code can be cloned from bitbucket as,
 
 `
