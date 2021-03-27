@@ -4,3 +4,5 @@ Initial code can be cloned from bitbucket as,
 `
 git clone https://nadluru@bitbucket.org/mskdwiteam/mskdwi.git
 `
+- [ISMRM 2017 talk](http://brainimaging.waisman.wisc.edu/~adluru/ISMRM2017MSKDWI.pptx)
+- RSNA 2019 talk
